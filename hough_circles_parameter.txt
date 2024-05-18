@@ -1,0 +1,1 @@
+{"r_min": 27, "r_max": 32, "param1": 91, "param2": 23, "color": 335}
