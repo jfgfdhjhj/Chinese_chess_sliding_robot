@@ -27,7 +27,7 @@ turn_to_go = "w"
 # 是否只进行引擎测试
 only_test_engine = False
 # 是否进行残局摆放
-ending = False
+ending = True
 
 fen1 = "2bakab1r/9/2n1c1n2/p1p1p1p1p/c8/4P1PNP/P1P5C/R6r1/9/1NBAKAB2"
 fen2 = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR"

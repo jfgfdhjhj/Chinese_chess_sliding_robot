@@ -152,6 +152,7 @@ class PikafishEngineBoard(cchess.Board):
 
     def __init__(self, _fen="r1bakabr1/9/1cn3nc1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C1N2/9/RNBAKABR1 w - - 0 1", callback=None):
         self.fen_list = None
+        self._fen = _fen
         if _fen is None:
             super().__init__()
         else:
@@ -187,9 +188,9 @@ class PikafishEngineBoard(cchess.Board):
 
             self.push(cchess.Move.from_uci(move))
         if not self.move_list:
-            fen_list = fen
+            fen_list = self._fen
         else:
-            fen_list = fen + " moves " + " ".join(self.move_list)
+            fen_list = self._fen + " moves " + " ".join(self.move_list)
         if not is_legal:
             self.state = self.STATE_ILLEGAL
             logger.warning("进行移动的字符不合法")
@@ -351,14 +352,16 @@ def main(fen=None):
     # thread.join()
     engine.close()
 
-turn_to_go = "w"
-fen = "r1bakabr1/9/1cn3nc1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C1N2/9/RNBAKABR1 w - - 0 1"
-fen1 = "rnbakab1r/9/1c4nc1/p1p1p1p1p/9/8P/P1P1P1P2/1C5C1/9/RNBAKABNR w - - 2 2"
-fen3 = "3n1k3/4P2r1/6P1b/9/R8/2r6/9/3p4R/1nc1p1p2/3K5"
-fen3 = fen3 + f" {turn_to_go} - - 0 1"
-print(fen3)
+# turn_to_go = "w"
+# fen = "r1bakabr1/9/1cn3nc1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C1N2/9/RNBAKABR1 w - - 0 1"
+# fen1 = "rnbakab1r/9/1c4nc1/p1p1p1p1p/9/8P/P1P1P1P2/1C5C1/9/RNBAKABNR w - - 2 2"
+# fen3 = "3n1k3/4P2r1/6P1b/9/R8/2r6/9/3p4R/1nc1p1p2/3K5"
+# fen3 = fen3 + f" {turn_to_go} - - 0 1"
+
+
 if __name__ == "__main__":
-    main(fen=fen3)
+    pass
+    # main(fen=fen)
     # board = PikafishEngineBoard(fen)
     # print(board.fen())
     # fen = "r1bakabr1/9/1cn3nc1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C1N2/9/RNBAKABR1 w - - 0 1"

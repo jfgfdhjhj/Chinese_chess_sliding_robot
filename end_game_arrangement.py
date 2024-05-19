@@ -29,16 +29,15 @@ def recognize_chess_position():
     font = cv2.FONT_HERSHEY_SIMPLEX
     OutPicturePath = "output/"
     red_pigment_threshold = hough_circles_parameter_dict["color"]
-    # 用于统计棋子的列表
-    chess_recognize_list = []
-    # 变量清零
-    blank_num = 0
-    red_num = 0
-    # 总棋子数量
-    ChessNumCount = 0
     picture_mun = 0
-
     while True:
+        # 用于统计棋子的列表
+        chess_recognize_list = []
+        # 变量清零
+        blank_num = 0
+        red_num = 0
+        # 总棋子数量
+        ChessNumCount = 0
         image = recognition_circle_multiple(time=5)[1]
         cv2.imwrite(r"C:/Users/jhf12/Documents/graduation_project/chess_robot/photos/end_game_arrangement.png", image)
         imgSource = image.copy()
@@ -183,6 +182,8 @@ class EndGameGenerate:
     STANDARD_GAME = 1
     END_GAMEE = 2
     err = 50
+    err1 = 10
+
     def __init__(self, end_fen, recognize_list):
 
         self.standard_res1 = None
@@ -309,18 +310,49 @@ class EndGameGenerate:
         return self.route_list1
 
     def standard_route_plan2(self):
-        for row, col, pixel_row, pixel_col, end_chess_id in self.need_overlapping_pieces_list:
+        print("self.need_overlapping_pieces_list", self.need_overlapping_pieces_list)
+        print("self.recognize_list", self.recognize_list)
+        cycle_index = len(self.need_overlapping_pieces_list)
+
+        for i in range(cycle_index):
             for pixel_row1, pixel_col1, chess_id in self.recognize_list:
-                if chess_id == end_chess_id:
+                other_mini_distance = 0
+                mini_distance = 0
+                flag = 0
+                other_distance_list = []
+                for row, col, pixel_row, pixel_col, end_chess_id in self.need_overlapping_pieces_list:
                     distance = math.sqrt((pixel_row - pixel_row1) ** 2 + (pixel_col - pixel_col1) ** 2)
-                    if distance <= self.err:
-                        self.recognize_list.remove([pixel_row1, pixel_col1, chess_id])
-                        self.waiting_end_keyid_list.remove([pixel_row, pixel_col, end_chess_id])
-                        break
-                    self.route_list2.append([pixel_row1, pixel_col1, pixel_row, pixel_col])
-                    self.recognize_list.remove([pixel_row1, pixel_col1, chess_id])
-                    self.waiting_end_keyid_list.remove([pixel_row, pixel_col, end_chess_id])
+                    if other_mini_distance <= distance:
+                        other_mini_distance = distance
+                        other_distance_list = [pixel_row1, pixel_col1, chess_id, distance]
+                    if chess_id == end_chess_id:
+                        if distance <= self.err1:
+                            self.recognize_list.remove([pixel_row1, pixel_col1, chess_id])
+                            self.waiting_end_keyid_list.remove([pixel_row, pixel_col, end_chess_id])
+                            self.need_overlapping_pieces_list.remove([row, col, pixel_row, pixel_col, end_chess_id])
+                            flag = 1
+                            break
+                        if mini_distance <= distance:
+                            temporary_need_overlapping_pieces_list = [row, col, pixel_row, pixel_col, end_chess_id]
+                            temporary_route_list2 = [pixel_row1, pixel_col1, pixel_row, pixel_col]
+                            temporary_recognize_list = [pixel_row1, pixel_col1, chess_id]
+                            temporary_waiting_end_keyid_list = [pixel_row, pixel_col, end_chess_id]
+                            mini_distance = distance
+                            flag = 2
+                if flag == 2:
+                    if other_distance_list[3] <= self.err1 and other_distance_list[2] != temporary_need_overlapping_pieces_list[4]:
+                        logger.warning("存在棋子重叠情况,需要移动")
+                    self.route_list2.append(temporary_route_list2)
+                    self.recognize_list.remove(temporary_recognize_list)
+                    self.waiting_end_keyid_list.remove(temporary_waiting_end_keyid_list)
+                    self.need_overlapping_pieces_list.remove(temporary_need_overlapping_pieces_list)
                     break
+                elif flag == 1:
+                    break
+                        # self.route_list2.append([pixel_row1, pixel_col1, pixel_row, pixel_col])
+                        # self.recognize_list.remove([pixel_row1, pixel_col1, chess_id])
+                        # self.waiting_end_keyid_list.remove([pixel_row, pixel_col, end_chess_id])
+                        # break
         print("recognize_list3:, len:", self.recognize_list, len(self.recognize_list))
         print("route_list2:", self.route_list2)
         return self.route_list2
@@ -345,6 +377,10 @@ class EndGameGenerate:
             two_col_piece_list.append([x_num1, y_num1])
             x_num2, y_num2 = int((i * 10 + 9) / 10), int((i * 10 + 9) % 10)
             two_col_piece_list.append([x_num2, y_num2])
+        two_col_piece_list.append([1, 2])
+        two_col_piece_list.append([7, 2])
+        two_col_piece_list.append([1, 7])
+        two_col_piece_list.append([7, 7])
 
         self.two_col_piece_list = two_col_piece_list
         self.eliminate_two_rows_of_coordinates()
@@ -572,8 +608,8 @@ if __name__ == '__main__':
     fen3 = "3n1k3/4P2r1/6P1b/9/R8/2r6/9/3p4R/1nc1p1p2/3K5 w"
     # fen = input("请输入残局fen字符串")
     chess_recognize_list = recognize_chess_position()
-    end_game = EndGameRoute(fen3, chess_recognize_list)
-    end_game.set_home()
-    logger.info("滑轨设置原点成功")
-    time.sleep(2)
-    end_game.run_game()
+    end_game = EndGameRoute(fen2, chess_recognize_list)
+    # end_game.set_home()
+    # logger.info("滑轨设置原点成功")
+    # time.sleep(2)
+    # end_game.run_game()
