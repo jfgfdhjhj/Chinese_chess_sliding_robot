@@ -29,7 +29,7 @@ class ClientEle:
     def send_topic_msg(self, topic, *msg):
         send_list = [topic, *msg]
         send_json_list = json.dumps(send_list)
-        print(send_json_list)
+        logger.debug(send_json_list)
         self.c.send(bytes(send_json_list, encoding='utf-8'))
         res = self.c.recv(1024).decode('utf-8')
         # while True:
