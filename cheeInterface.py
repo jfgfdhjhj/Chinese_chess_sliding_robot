@@ -26,7 +26,8 @@ num_id = 1
 turn_to_go = "w"
 # 是否只进行引擎测试
 only_test_engine = False
-# 是否进行残局摆放
+# 是否进行残局摆放,True：进行摆放用户提供的fen字符串，
+#               False：识别用户摆放的局面
 ending = True
 
 fen1 = "2bakab1r/9/2n1c1n2/p1p1p1p1p/c8/4P1PNP/P1P5C/R6r1/9/1NBAKAB2"
@@ -34,7 +35,7 @@ fen2 = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR"
 fen3 = "3n1k3/4P2r1/6P1b/9/R8/2r6/9/3p4R/1nc1p1p2/3K5"
 
 # fen = input("请输入残局fen字符串")
-my_fen = fen2
+my_fen = fen3
 
 if ending:
     chess_recognize_list = recognize_chess_position()
@@ -50,7 +51,7 @@ else:
     if ending:
         _fen = my_fen
     else:
-        _result, _fen, _board_unicode = initial_game_judgment()
+        _result, _fen, _board_unicode = initial_game_judgment(is_show_windows=True)
         if _result:
             logger.info("last: %s %s\n%s", _result, _fen, _board_unicode)
             print(_fen)

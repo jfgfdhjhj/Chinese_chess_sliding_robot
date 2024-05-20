@@ -156,7 +156,7 @@ class EndGameGenerate:
     weight_x = space_between_x = dar_y
 
     # 棋子的厚度
-    delta_z = -11
+    delta_z = -10
     delta_x = weight_x
     delta_y = high_y
 
@@ -186,6 +186,7 @@ class EndGameGenerate:
 
     def __init__(self, end_fen, recognize_list):
 
+        self.is_piece_drop_count = False
         self.standard_res1 = None
         self.standard_res2 = None
         self.standard_res3 = None
@@ -422,6 +423,7 @@ class EndGameGenerate:
             if self.temporarily_set_aside_num >= 16:
                 self.temporarily_set_aside_num = 0
                 logger.warning("需要移除的棋子数量大于16")
+                self.is_piece_drop_count = True
 
         self.recognize_list = reserved_piece_list[:]
         print("recognize_list,", self.recognize_list)
@@ -433,16 +435,18 @@ class EndGameGenerate:
         need_need_overlapping_keyid_list = []
         no_need_overlapping_pieces_list = []
         no_need_overlapping_keyid_list = []
-        end_keyid_list = self.end_keyid_list
+        end_keyid_list = self.end_keyid_list[:]
 
         for row, col, pixel_row, pixel_col, end_chess_id in self.end_keyid_list:
             self.waiting_end_keyid_list.append([pixel_row, pixel_col, end_chess_id])
-
-        for row, col, pixel_row, pixel_col, end_chess_id in end_keyid_list:
-            if [row, col] in self.end_col_piece_list:
-                no_need_overlapping_pieces_list.append([row, col, pixel_row, pixel_col, end_chess_id])
-                no_need_overlapping_keyid_list.append(end_chess_id)
-                end_keyid_list.remove([row, col, pixel_row, pixel_col, end_chess_id])
+        index_num_time = len(self.end_keyid_list)
+        for i in range(index_num_time):
+            for row, col, pixel_row, pixel_col, end_chess_id in end_keyid_list:
+                if [row, col] in self.end_col_piece_list:
+                    no_need_overlapping_pieces_list.append([row, col, pixel_row, pixel_col, end_chess_id])
+                    no_need_overlapping_keyid_list.append(end_chess_id)
+                    end_keyid_list.remove([row, col, pixel_row, pixel_col, end_chess_id])
+                    break
 
         for row, col, pixel_row, pixel_col, end_chess_id in end_keyid_list:
             need_overlapping_pieces_list.append([row, col, pixel_row, pixel_col, end_chess_id])
@@ -555,7 +559,7 @@ class EndGameRoute(ChessRobotEle):
                 self.uplift(0)
                 if is_manual_piece_removal:
                     if num >= 16:
-                        input("请手动移除多余的棋子")
+                        input("请手动移除多余的棋子，移除完按回车")
                         num = 0
 
     def move_group_list(self, move_list):
@@ -593,12 +597,14 @@ class EndGameRoute(ChessRobotEle):
         self.init()
         end_res1, end_res2, end_res3, end_res4, end_res5 = self.end_game_generate.return_end_res()
 
-        self.move_group_home_list(end_res1, is_slide_position_first=False)
+        self.move_group_home_list(end_res1, is_slide_position_first=False,
+                                  is_manual_piece_removal=self.end_game_generate.is_piece_drop_count)
         self.move_group_home_list(end_res2, is_slide_position_first=False)
         self.move_group_list(end_res3)
         self.move_group_list(end_res4)
         self.move_group_home_list(end_res5, is_slide_position_first=True)
         self.return_to_home()
+        input("请手动移除多余的棋子，防止影响后续对局，移除完按回车")
 
 
 if __name__ == '__main__':
@@ -608,7 +614,7 @@ if __name__ == '__main__':
     fen3 = "3n1k3/4P2r1/6P1b/9/R8/2r6/9/3p4R/1nc1p1p2/3K5 w"
     # fen = input("请输入残局fen字符串")
     chess_recognize_list = recognize_chess_position()
-    end_game = EndGameRoute(fen2, chess_recognize_list)
+    end_game = EndGameRoute(fen3, chess_recognize_list)
     # end_game.set_home()
     # logger.info("滑轨设置原点成功")
     # time.sleep(2)
