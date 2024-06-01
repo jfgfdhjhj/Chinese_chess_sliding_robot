@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # encoding:utf-8
+import time
+
 import cv2
 import json
 import math
@@ -244,19 +246,40 @@ def initial_game_judgment(is_create_trackbar=False, is_write_picture=True, is_sh
             fen = None
             result_judge_all_id_is_legal = None
             board_unicode = None
-        key = input("请输入参数，n或者q:(n为继续检测，q为保存检测)")
-        if key == 'q':
-            # print(external_contours)
-            if is_show_windows:
+        print("请输入参数，n或者q:(n为继续检测，q为保存检测):")
+        if is_show_windows:
+            key = cv2.waitKey(0) & 0xFF  # 获取按键的ASCII码
+        else:
+            key = input()
+            # key = input("请输入参数，n或者q:(n为继续检测，q为保存检测)")
+        if is_show_windows:
+            if key == ord('q'):
                 cv2.destroyAllWindows()
-            cap.release()
-            return result_judge_all_id_is_legal, fen, board_unicode
-        if key == 'n':
-            picture_mun += 1
-            if is_show_windows:
+                cap.release()
+                return result_judge_all_id_is_legal, fen, board_unicode
+            elif key == ord('n'):
                 cv2.destroyAllWindows()
-            # print(external_contours)
-            continue
+                picture_mun += 1
+                continue
+        else:
+            if key == "q":
+                cap.release()
+                return result_judge_all_id_is_legal, fen, board_unicode
+            elif key == "n":
+                picture_mun += 1
+                continue
+        # if key == 'q':
+        #     # print(external_contours)
+        #     if is_show_windows:
+        #         cv2.destroyAllWindows()
+        #     cap.release()
+        #     return result_judge_all_id_is_legal, fen, board_unicode
+        # if key == 'n':
+        #     picture_mun += 1
+        #     if is_show_windows:
+        #         cv2.destroyAllWindows()
+        #     # print(external_contours)
+        #     continue
 
 
 def re_detect_chess_position(before_fen):

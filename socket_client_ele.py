@@ -20,7 +20,7 @@ class ClientEle:
         if _is_vm:
             _ip_address = "192.168.139.136"
         else:
-            _ip_address = '169.254.150.116'
+            _ip_address = '192.168.1.116'
         c = socket.socket()
         self.c = c
         c.connect((_ip_address, self.port))

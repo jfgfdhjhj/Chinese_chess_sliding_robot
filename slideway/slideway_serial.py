@@ -408,11 +408,11 @@ class SlideChessRobot(SlideSerialParser):
                 coordinate = [(x + 1) * delta_x, y * delta_y, z * delta_z]
                 chess_eat_position.append(coordinate)
 
-    def __init__(self, port='COM6', baudrate=115200, timeout=2):
+    def __init__(self, port='COM7', baudrate=115200, timeout=2):
         super().__init__(port, baudrate, timeout)
         self.hand_eye_slide = HandInEyeCalibrationSlide()
         self.recovery_list = []
-        self.eat_chess_num = 0
+        self.eat_chess_num = -1
         self.is_eat_num_full = False
 
     def judge_add_one_eat_num(self):

@@ -20,22 +20,26 @@ from camera import frame_grab
 from slide_ele_control import ChessRobotEle
 from XQPy_main.XQlightPy.position import Position
 
+# 象棋引擎搜索深度
 depth_times = 20
+
+# 当机器人走完后需要拍摄的图片帧数
 frame_times = 5
 num_id = 1
 turn_to_go = "w"
-# 是否只进行引擎测试
+
+# 是否只进行引擎测试，True：只进行引擎测试，False：正常运行
 only_test_engine = False
-# 是否进行残局摆放,True：进行摆放用户提供的fen字符串，
-#               False：识别用户摆放的局面
+
+# 是否进行残局摆放,True：进行摆放用户提供的fen字符串，False：识别用户摆放的局面
 ending = True
 
 fen1 = "2bakab1r/9/2n1c1n2/p1p1p1p1p/c8/4P1PNP/P1P5C/R6r1/9/1NBAKAB2"
-fen2 = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR"
+fen2 = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR"  # 标准开局
 fen3 = "3n1k3/4P2r1/6P1b/9/R8/2r6/9/3p4R/1nc1p1p2/3K5"
 
 # fen = input("请输入残局fen字符串")
-my_fen = fen3
+my_fen = fen2
 
 if ending:
     chess_recognize_list = recognize_chess_position()

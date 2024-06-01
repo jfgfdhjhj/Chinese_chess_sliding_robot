@@ -7,11 +7,11 @@ import os
 from chess_utils.logger import logger
 
 # 单个横着的棋盘宽 mm
-dar_x = 25.5
+dar_x = 26.0
 # 单个横着的棋盘高 mm
-dar_y = 24.1
+dar_y = 24.5
 # 原点距离棋盘竖着的右上角绝对值 mm
-offset_y = 37.5
+offset_y = 39.0
 
 
 def generate_slide_coordinates(num_rows=9, num_columns=10):
@@ -68,8 +68,8 @@ class HandInEyeCalibrationSlide:
     def _get_points_slide(self, x_camera, y_camera):
         """
         相机坐标通过仿射矩阵变换取得滑轨坐标
-        :param x_camera:
-        :param y_camera:
+        :param x_camera:像素横坐标
+        :param y_camera:像素纵坐标
         :return:
         """
         # 定义要映射的单个点,此点不经过任何处理，仅仅为图片识别的像素点
