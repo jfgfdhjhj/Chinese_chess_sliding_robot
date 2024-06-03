@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 # encoding:utf-8
+# 用于象棋棋盘的识别函数
 import cv2
 import numpy as np
 import math
 import json
 from chess_utils.logger import logger
 from system import checkerboard_12_pixels_position_array, roi_parameter_list
+
 # 测试图片保存路径
 TestPicturePath = 'TestPicture/'
 OutPicturePath = "output/"
 file = "board_position.txt"
 checkerboard_parameter_path = "checkerboard_parameter.txt"
 
-# # 单个棋盘宽度，2.5 * 8单位cm
+# 单个棋盘宽度，2.5 * 8单位cm
 # weight = 2.5
-# # 单个棋盘高度，2. 64 * 9单位cm
+# 单个棋盘高度，2. 64 * 9单位cm
 # height = 2.64
 
 
@@ -32,8 +34,9 @@ finish_pos = (0, 0)
 weight = roi_parameter_list[1][0] - roi_parameter_list[0][0]
 high = roi_parameter_list[1][1] - roi_parameter_list[0][1]
 
-# 棋盘有没有圆圈，有为Ture，没有改为False
+# 棋盘有没有圆圈，有为Ture，没有改为False，目前已经弃用，只能为False
 is_test = False
+
 # 找到之后这里改成True，没找到改成False
 is_find_4_corner = True
 
@@ -58,6 +61,10 @@ def rectangle_maximum_threshold(value):
 
 
 def calculate_angle3(p1, p2, p3):
+    """
+    这个函数的目的是计算由三个点 P1, P2 和 P3 所形成的两个向量之间的夹角。具体来说，
+    它计算的是这两个向量之间的夹角的度数和弧度。
+    """
     # 计算向量 P1P2 和 P2P3
     vec1 = [p1[0] - p2[0], p1[1] - p2[1]]
     vec2 = [p3[0] - p2[0], p3[1] - p2[1]]
@@ -80,6 +87,15 @@ def calculate_angle3(p1, p2, p3):
 
 
 def find_rectangle_corners(hull1, angle_threshold1):
+    """
+    用于寻找角点的函数，用于在一堆角点中寻找连续的三个点，由此组成一个三角形，求其角度，如果满足条件，就返回这个角点
+    Args:
+        hull1: 指定点hull矩阵
+        angle_threshold1: 角度范围
+
+    Returns: 角列表
+
+    """
     corners = []
     for i in range(len(hull1)):
         point1 = tuple(hull1[i % len(hull1)][0])
@@ -114,7 +130,8 @@ def chess_board_sort(points_all=None, delta=2):
         # 计算横坐标的平均值
         average_x = sum(x_coordinates) / len(x_coordinates)
         for point in points_all:
-            # 这里需要估计左边两个点大致的x轴的坐标，也就是cv2坐标的第一个点，要不然会报错
+
+            # 根据上文算出的横纵坐标平均值进行判断，将多余的点进行排除
             if 0 <= point[0] <= average_x:
                 corners_left.append(point)
             else:
@@ -122,6 +139,7 @@ def chess_board_sort(points_all=None, delta=2):
         # 找到最靠左
         left_top_most = min(corners_left, key=lambda x: x[1])
         left_bottom_most = max(corners_left, key=lambda x: x[1])
+
         # 找到最靠右
         right_top_most = min(corners_right, key=lambda x: x[1])
         right_bottom_most = max(corners_right, key=lambda x: x[1])
@@ -170,7 +188,19 @@ def unit_vector(p1, p2):
 
 
 def interpolate_points(top_left, top_right, bottom_left, bottom_right, num_rows=9, num_columns=10):
+    """
 
+    Args:
+        top_left: 棋盘的左上角坐标
+        top_right: 棋盘的右上角坐标
+        bottom_left: 棋盘的左下角坐标
+        bottom_right: 棋盘的右下角坐标
+        num_rows: 棋盘的行数
+        num_columns: 棋盘的列数
+
+    Returns:棋盘的所有点列表，横轴宽和纵轴长
+
+    """
     # 水平和垂直方向上的网格数
     horizontal_grid_count = num_columns - 1
     vertical_grid_count = num_rows - 1
@@ -256,9 +286,16 @@ while cap.isOpened() and 1:
         max_area = 0
 
         for contour in contours:
+            # 用于计算多边形轮廓周长
             perimeter = cv2.arcLength(contour, True)
+
+            # 进行多边形近似，寻找闭合的多边形
             approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+
+            # 计算多边形的面积
             area = cv2.contourArea(approx)
+
+            # 在多边形轮廓中寻找满足面积最大并且多边形边长个数为4的多边形轮廓
             if len(approx) == 4 and area > max_area:
                 max_area = area
                 external_contours = [contour]
@@ -278,10 +315,13 @@ while cap.isOpened() and 1:
                 # 角度阈值滑块范围
                 angle_threshold = (a, b)
 
+            # 在绘制的凸包上寻找满足条件的点
             rectangle_corners = find_rectangle_corners(hull, angle_threshold)
+
             logger.debug(f"rectangle_corners:{rectangle_corners}")
             for corner in rectangle_corners:
                 cv2.circle(image, corner, 5, (0, 255, 255), -1)
+
             # 在图像上标记拐角
             if is_find_4_corner:
                 rectangle_corners = chess_board_sort(rectangle_corners)
@@ -296,8 +336,11 @@ while cap.isOpened() and 1:
                 top_right = rectangle_corners[1]
                 bottom_right = rectangle_corners[2]
                 bottom_left = rectangle_corners[3]
+
                 logger.debug("top_left:{}, top_right:{}, bottom_left:{}".format(top_left, top_right, bottom_left))
+
                 _, dx, dy = interpolate_points(top_left, top_right, bottom_left, bottom_right)
+
                 # 定义棋盘角点坐标
                 board_contour = np.array([top_left, top_right, bottom_right, bottom_left], dtype=np.float32)
 
@@ -313,8 +356,10 @@ while cap.isOpened() and 1:
                                                   (dx * 9, start_pos_top_left_y),
                                                   (start_pos_top_left_x, dy * 8), (dx * 9, dy * 8))
                 logger.debug("根据左上角点以及像素的长宽高计算出的所有点的理想坐标{}".format(points))
+
                 # 计算透视变换矩阵
                 m = cv2.getPerspectiveTransform(board_contour, target_corners)
+
                 np.save("board_matrix.npy", m)
                 logger.info("矩阵变换文件写入成功")
 
@@ -326,6 +371,7 @@ while cap.isOpened() and 1:
 
                 # 计算逆透视变换矩阵
                 m_inv = np.linalg.inv(m)
+
                 _points = []
                 for o1, o2, o3, o4 in points:
                     # 定义待逆变换的点坐标

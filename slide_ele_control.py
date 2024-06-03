@@ -82,7 +82,7 @@ class ChessRobotEle(SlideChessRobot):
             time.sleep(0.2)
             self.move_to_the_stack_site()
 
-            target_z = self.chess_eat_position[self.eat_chess_num - 1][2]
+            target_z = self.chess_eat_position[self.eat_chess_num][2]
             self.fall_down(abs(target_z))
             time.sleep(0.5)
             self.clint_ele.send_electromagnet_fall()

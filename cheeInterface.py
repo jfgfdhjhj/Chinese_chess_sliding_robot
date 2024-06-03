@@ -39,6 +39,7 @@ fen2 = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR"  # 标准�
 fen3 = "3n1k3/4P2r1/6P1b/9/R8/2r6/9/3p4R/1nc1p1p2/3K5"
 
 # fen = input("请输入残局fen字符串")
+# 输入fen字符串
 my_fen = fen2
 
 if ending:

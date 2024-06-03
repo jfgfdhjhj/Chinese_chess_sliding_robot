@@ -37,6 +37,16 @@ standard_chess_board = chess_board_dic["chess_board"]
 
 
 def match_chess_position(original_piece_position, standard_piece_position, error=35):
+    """
+    进行识别到的坐标和标准坐标的匹配
+    Args:
+        original_piece_position:识别到的棋子坐标列表
+        standard_piece_position: 标准的棋盘格子坐标列表
+        error: 两个坐标之间的距离相差多少即可认为棋子在坐标格子上
+
+    Returns:匹配完成的棋子列表，棋子个数
+
+    """
     chess_recognize_finish = []
     for p, l, chess_id in original_piece_position:
         for i, j, x1, y1 in standard_piece_position:
@@ -52,7 +62,16 @@ def match_chess_position(original_piece_position, standard_piece_position, error
 # original_image_cut
 # 是否读取摄像头拍摄的照片 # is_write_picture = False
 def initial_game_judgment(is_create_trackbar=False, is_write_picture=True, is_show_windows=False):
+    """
+    用于初始局面的识别
+    Args:
+        is_create_trackbar:是否创建滑动块
+        is_write_picture: 是否保存识别后的图片
+        is_show_windows: 进行识别之后是否显示识别结果
 
+    Returns: 如果识别完毕，返回识别的合法性，返回fen字符，返回unicode列表
+
+    """
     # 定义文本内容和位置
     org = (0, 70)  # 左上角位置
     fontScale = 3
@@ -160,11 +179,21 @@ def initial_game_judgment(is_create_trackbar=False, is_write_picture=True, is_sh
                 if not set_x_y_pixel_limit(x, y):
                     continue
                 # r1 = 19
+
+                # 统计出红色像素的个数
                 redPixelValueCount = statistical_red_pixel(imgSource[y - r1:y + r1, x - r1:x + r1])
+
                 # -------------------------------------------------------------------------------------------------------
+
+                # 将图片转换为灰度图
                 image1_second = cv2.cvtColor(imgSource, cv2.COLOR_BGR2GRAY)
+
+                # 裁剪出指定的棋子部分
                 image1 = image1_second[y - r1:y + r1, x - r1:x + r1]
+
+                # 将裁剪的棋子图片进一步处理
                 image_to_font = ImageToFont(image1)
+
                 if image_to_font.isCheck:
                     image_font = image_to_font()
                 else:
@@ -175,13 +204,15 @@ def initial_game_judgment(is_create_trackbar=False, is_write_picture=True, is_sh
 
                 # 红色像素个数用b代替下面的常数
                 if redPixelValueCount > b:
-                    # 0--将, 1--黑車, 2--黑馬, 3--黑象, 4--黑士,  5--黑炮,  6--黑卒
+                    # 0--将, 1--红車, 2--红馬, 3--红相, 4--红仕,  5--红炮,  6--红兵
                     Red_classes = ('R_King', 'R_Car', 'R_Hor', 'R_Elep', 'R_Bis', 'R_Canon', 'R_Pawn')
                     # 红色棋子用绿点标记
                     cv2.circle(imgSource, (x, y), 4, (0, 255, 0), -1)
                     # 标记检测到的棋子位置
                     cv2.circle(imgSource, (x, y), r1, (0, 0, 255), 2)
+                    # 送入模型进行检测
                     prediction = single_chess_red_recognize(image_font)
+                    # 得出棋子的ID
                     imgID = Red_classes[prediction]
                     red_num += 1
                     # 标记棋子ID
@@ -193,7 +224,9 @@ def initial_game_judgment(is_create_trackbar=False, is_write_picture=True, is_sh
                     cv2.circle(imgSource, (x, y), 4, (255, 255, 255), -1)
                     # 0--黑将, 1--黑車, 2--黑馬, 3--黑象, 4--黑士,  5--黑炮,  6--黑卒
                     Black_classes = ('B_King', 'B_Car', 'B_Hor', 'B_Elep', 'B_Bis', 'B_Canon', 'B_Pawn')
+                    # 送入模型进行检测
                     prediction = single_chess_black_recognize(image_font)
+                    # 得出棋子的ID
                     imgID = Black_classes[prediction]
                     blank_num += 1
                     # 标记检测到的棋子位置
@@ -204,7 +237,7 @@ def initial_game_judgment(is_create_trackbar=False, is_write_picture=True, is_sh
                 # 增加对应的棋子到相应列表
                 chess_recognize.append([x, y, imgID])
 
-                # 存储棋子裁剪后的图片，检查正确性
+                # 存储棋子裁剪后的图片
                 cv2.imwrite(OutPicturePath + "cut/gray_image/" + "cut" + str(ChessNumCount) + ".png",
                             gray[y - r1:y + r1, x - r1:x + r1])
 
@@ -251,21 +284,24 @@ def initial_game_judgment(is_create_trackbar=False, is_write_picture=True, is_sh
             key = cv2.waitKey(0) & 0xFF  # 获取按键的ASCII码
         else:
             key = input()
-            # key = input("请输入参数，n或者q:(n为继续检测，q为保存检测)")
         if is_show_windows:
             if key == ord('q'):
+                # 人工核查棋子识别没有问题，按下q保存参数
                 cv2.destroyAllWindows()
                 cap.release()
                 return result_judge_all_id_is_legal, fen, board_unicode
             elif key == ord('n'):
+                # 如果人工核查出现识别错误的情况，按下n继续识别
                 cv2.destroyAllWindows()
                 picture_mun += 1
                 continue
         else:
             if key == "q":
+                # 人工核查棋子识别没有问题，按下q保存参数
                 cap.release()
                 return result_judge_all_id_is_legal, fen, board_unicode
             elif key == "n":
+                # 如果人工核查出现识别错误的情况，按下n继续识别
                 picture_mun += 1
                 continue
         # if key == 'q':
@@ -283,6 +319,15 @@ def initial_game_judgment(is_create_trackbar=False, is_write_picture=True, is_sh
 
 
 def re_detect_chess_position(before_fen):
+    """
+    用于移动棋子的过程中出现报错时的再次识别，识别与上面的函数大同小异，只不过返回值返回的是
+    移动的fen字符串
+    Args:
+        before_fen: 识别之前的fen列表
+
+    Returns:移动的fen字符串
+
+    """
     recognize_time_list = []
     # 用于统计棋子的列表
     chess_recognize = []
@@ -386,6 +431,14 @@ def re_detect_chess_position(before_fen):
 
 
 def _parse_fen(fen):
+    """
+    解析fen字符，将其转换为列表形式
+    Args:
+        fen:
+
+    Returns:
+
+    """
     board = []
     first_part = fen.split(' ')[0]
     fen_parts = first_part.split('/')
@@ -403,11 +456,23 @@ def _parse_fen(fen):
 
 
 def find_move(initial_board, final_board):
+    """
+    根据前后的fen字符串判断棋子的走棋结果
+    大致思路为排除法一一进行个判断，走棋只有三种结果：没有走棋，移动或者吃子，根据三种状况的不同一一排除
+    Args:
+        initial_board: 走之前的fen字符串
+        final_board: 走之后的fen字符串
+
+    Returns:
+
+    """
     moving_pieces = []
     for row in range(len(initial_board)):
         for col in range(len(initial_board[row])):
             if initial_board[row][col] != final_board[row][col]:
                 moving_pieces.append((row, col))
+    if len(moving_pieces) == 0:
+        return False
 
     x1 = moving_pieces[0][0]
     y1 = moving_pieces[0][1]
@@ -420,6 +485,7 @@ def find_move(initial_board, final_board):
     chess_piece3 = final_board[x1][y1]
     chess_piece4 = final_board[x2][y2]
     if chess_piece1 != "." and chess_piece2 != ".":
+        # 进行移动判断
         if chess_piece3 == ".":
             initial_board_list = (x1, y1)
             final_board_list = (x2, y2)
@@ -428,6 +494,7 @@ def find_move(initial_board, final_board):
             final_board_list = (x1, y1)
     else:
         if chess_piece1 == chess_piece4 and chess_piece2 == chess_piece3:
+            # 进行吃子判断
             if chess_piece3 == ".":
                 initial_board_list = (x1, y1)
                 final_board_list = (x2, y2)
@@ -435,6 +502,7 @@ def find_move(initial_board, final_board):
                 initial_board_list = (x2, y2)
                 final_board_list = (x1, y1)
         else:
+            # 根据排除法，状态就是没有移动，也没有吃子
             return False
 
     # print("initial_board_list", initial_board_list)
@@ -444,6 +512,14 @@ def find_move(initial_board, final_board):
 
 
 def convert_to_algebraic_notation(move):
+    """
+    将得到的move列表准换为fen_move字符
+    Args:
+        move:
+
+    Returns:
+
+    """
     letters = "abcdefghi"
     numbers = "0123456789"
     start_col, start_row = move[0]

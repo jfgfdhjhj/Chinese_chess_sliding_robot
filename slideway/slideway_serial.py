@@ -453,6 +453,9 @@ class SlideChessRobot(SlideSerialParser):
             return False
 
     def move_to_the_stack_site(self):
+        """
+        将棋子移动到回收区域
+        """
         target_x = self.chess_eat_position[self.eat_chess_num][0]
         target_y = self.chess_eat_position[self.eat_chess_num][1]
         target_z = self.chess_eat_position[self.eat_chess_num][2]

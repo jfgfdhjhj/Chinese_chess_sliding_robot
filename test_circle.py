@@ -109,7 +109,8 @@ while True and 1:
                 cv2.circle(imgSource, (x, y), r1, (0, 255, 0), 2)
             else:
                 cv2.circle(imgSource, (x, y), r1, (0, 0, 255), 2)
-    cv2.imshow("slider", imgSource)
+    # cv2.imshow("slider", imgSource)
+    cv2.imshow("windows", imgSource)
     key = cv2.waitKey(100)
     if key == ord("q"):
         print(hough_circles_parameter_dict)

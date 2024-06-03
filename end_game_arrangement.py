@@ -279,7 +279,7 @@ class EndGameGenerate:
         self.no_need_overlapping_keyid_list = no_need_overlapping_keyid_list
 
     def screen_out_the_pieces_that_need_to_be_moved(self):
-        # 废弃方案
+        # 废弃方案,有合适的思路时候再做修改
         overlapping_pieces_list = []
         screen_out_the_pieces_that_need_to_be_moved_list = []
         for pixel_row1, pixel_col1, chess_id in self.recognize_list:
