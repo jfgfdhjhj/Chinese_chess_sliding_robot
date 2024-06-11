@@ -166,6 +166,9 @@ def taking_photos(is_open_camera=False):
 
 
 def one_frame_grab(is_crop=False):
+    """
+    拍摄一帧画面，is_crop:是否裁剪画面
+    """
     cap = cv2.VideoCapture(1)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
@@ -182,6 +185,15 @@ def one_frame_grab(is_crop=False):
 
 
 def frame_grab(num_frames=5, is_crop=False):
+    """
+    拍摄多帧画面，默认拍摄5帧
+    Args:
+        num_frames: 拍摄的帧数
+        is_crop: 是否裁剪画面
+
+    Returns:
+
+    """
     cap = cv2.VideoCapture(1)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
