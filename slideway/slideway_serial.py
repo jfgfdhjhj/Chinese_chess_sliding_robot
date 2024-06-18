@@ -147,13 +147,23 @@ class SlideSerialParser(SerialParser):
             pass
 
     def calculating_motion_time(self, d, a, v):
+        """
+        计算运动时间的函数，理想情况滑轨是个加速匀速减速的过程
+        Args:
+            d: 运动距离
+            a: 加速度
+            v: 匀速运动的速度
+
+        Returns:运动的时间
+
+        """
         motion_time = v/a + d/v
 
         return motion_time
 
     def check_position(self, *target_position, time_out=15, tolerance=0.1, is_check_ok=True):
         """
-        检查位置，*target_position为元组，例如（"x":5），（"y":10)，（"z":20）
+        检查位置，*target_position为元组，例如（"x"，5）,（"y"，10),（"z"，20）
         """
         # 初始化目标位置
         target_positions = {}
@@ -257,6 +267,14 @@ class SlideSerialParser(SerialParser):
             return False
 
     def parse_line(self, line):
+        """
+        解析函数，解析串口发送回来的数据
+        Args:
+            line:
+
+        Returns:
+
+        """
         ok_pattern = re.compile(r'ok')
         # 使用正则表达式搜索字符串
         match_ok = ok_pattern.search(line)
@@ -332,6 +350,11 @@ class SlideSerialParser(SerialParser):
             print(line)
 
     def set_home(self):
+        """
+        因为步进电机是开环控制的，每次上电不知道具体位置，所以需要设置滑轨的运动原点
+        Returns:
+
+        """
         self.is_ok = False
         self.send_command("G92 X0 Y0 Z0")
         self.position_dict["x"] = 0
@@ -339,15 +362,34 @@ class SlideSerialParser(SerialParser):
         self.position_dict["z"] = 0
 
     def return_to_home(self):
+        """
+        滑轨返回原点的函数，先移动xy轴，再移动z轴
+        Returns:
+
+        """
         self.run_assigned_position(("x", 0), ("y", 0), time_out=15)
         self.run_assigned_position(("z", 0), time_out=5, is_check_ok=False)
         self.z_position = 0
 
     def init(self):
+        """
+        滑轨进行初始化，xyz轴同时移动
+        Returns:
+
+        """
         self.run_assigned_position(("x", 0), ("y", 0), ("z", 0), time_out=15)
         self.z_position = 0
 
     def uplift(self, z=0, speed=400):
+        """
+        z轴向上提升的函数
+        Args:
+            z:
+            speed: 速度
+
+        Returns:
+
+        """
         self.is_ok = False
         if z != 0:
             z = -abs(z)
@@ -362,6 +404,15 @@ class SlideSerialParser(SerialParser):
         # self.check_finish(time_out=1)
 
     def fall_down(self, z=5, speed=400):
+        """
+        z轴向下运动的函数
+        Args:
+            z:
+            speed:
+
+        Returns:
+
+        """
         self.is_ok = False
         if z != 0:
             z = abs(z)
@@ -408,7 +459,7 @@ class SlideChessRobot(SlideSerialParser):
                 coordinate = [(x + 1) * delta_x, y * delta_y, z * delta_z]
                 chess_eat_position.append(coordinate)
 
-    def __init__(self, port='COM7', baudrate=115200, timeout=2):
+    def __init__(self, port='COM8', baudrate=115200, timeout=2):
         super().__init__(port, baudrate, timeout)
         self.hand_eye_slide = HandInEyeCalibrationSlide()
         self.recovery_list = []
@@ -498,10 +549,10 @@ class SlideChessRobot(SlideSerialParser):
 
 
 if __name__ == '__main__':
-
+    # 运行main可能会报错，懒得检查了
     # Example usage:
     # chess_slide = SlideSerialParser()
-    chess_slide = SlideChessRobot(port="COM6")
+    chess_slide = SlideChessRobot(port="COM3")
     # chess_slide = SerialParser()
     try:
         while True:
